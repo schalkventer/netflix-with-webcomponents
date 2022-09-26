@@ -1,89 +1,64 @@
-import { store } from '../store.js'
+import {
+    LitElement,
+    html,
+    css,
+} from 'https://cdn.jsdelivr.net/gh/lit/dist@2/all/lit-all.min.js';
 
-class Component extends HTMLElement {
-    inner = this.attachShadow({ mode: 'closed' })
-    label = this.getAttribute('label')
-    pagination = parseInt(this.getAttribute('pagination')) || 0
-    movies = []
-
-    elements = {
-        button: null,
-        list: null,
+class Component extends LitElement {
+    static get properties() {
+        return {
+            label: { type: String },
+            pagination: { type: Number },
+            movies: { state: true, type: Array }
+        }
     }
 
-    render() {
+    static styles = css`
+        div {
+            padding: 1rem;
+        }
+
+        h2 {
+            font-family: sans-serif;
+            font-size: 48px;
+        }
+
+        ul {
+            transition: transform 600ms;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            transform: translateX(0px);
+        }
+    `
+
+    next() {
         const totalPages = Math.ceil(this.movies.length / 7) - 1
         const width = 400 * 7
 
-        this.inner.innerHTML = /* html */ `
-            <style>
-                * { 
-                    box-sizing: border-box 
-                }
+        const newPagination = this.pagination + 1
+        this.pagination = newPagination >= totalPages ? 0 : newPagination
 
-                div {
-                    padding: 1rem;
-                }
+        const list = this.querySelector('ul')
+        list.style.transform = `translateX(-${newPagination * width}px)`
+    }
 
-                h2 {
-                    font-family: sans-serif;
-                    font-size: 48px;
-                }
+    render() {    
+        return html`
+            <h2>${this.label}</h2>
 
-                ul {
-                    transition: transform 600ms;
-                    list-style: none;
-                    margin: 0;
-                    padding: 0;
-                    display: flex;
-                    transform: translateX(-${this.pagination * width}px);
-                }
-            </style>
+            <ul>
+                ${this.movies.map(({ name, image }) => {
+                    return html`
+                        <li>
+                            <div>${name} ${image}</div>
+                        </li>`
+                })}
+            </ul>
 
-            <div>
-                <h2>${this.label}</h2>
-
-                <ul>
-                    ${this.movies.map(({ name, image }) => {
-                        return /* html */ `
-                            <li>
-                                <movie-preview 
-                                    label="${name}" 
-                                    image="${image}"
-                                ><movie-preview>
-                            </li>`
-                    }).join('')}
-                </ul>
-
-                <button>></button>
-            </div>
+            <button @click="${this.next}">NEXT</button>
         `
-    
-        this.elements = {
-            list: this.inner.querySelector('ul'),
-            button: this.inner.querySelector('button'),
-        }
-    
-        this.elements.button.addEventListener('click', () => {
-            const newPagination = this.pagination + 1
-            this.pagination = newPagination >= totalPages ? 0 : newPagination
-            this.elements.list.style.transform = `translateX(-${newPagination * width}px)`
-        })
-    }
-
-    connectedCallback() {
-        this.innerHTML = '<div>Loading</div>'
-
-        store.startListen(this.label, (prev, next) => {
-            if (prev.phase !== next.phase && next.phase === 'resting') {
-                this.movies = next.movies.slice(0, 28)
-                this.render()
-            }
-        })
-    }
-
-    disconnectedCallback() {
-        store.stopListen(this.label)
     }
 }
 
