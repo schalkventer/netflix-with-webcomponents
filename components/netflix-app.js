@@ -5,6 +5,10 @@ import {
 
 
 class Component extends LitElement {
+    constructor() {
+        super()
+    }
+
     static get properties () {
         return {
             phase: { type: String },
@@ -25,7 +29,7 @@ class Component extends LitElement {
         super.connectedCallback();
 
         const init = async () => {
-            const response = await fetch('https://project-apis.codespace.co.za/api/movies')
+            const response = await fetch('/api/data.json')
             
             /** @type {{ data: import('./types').movie[] }} */
             const { data } = await response.json()

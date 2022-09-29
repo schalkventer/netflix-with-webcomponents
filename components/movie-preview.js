@@ -2,6 +2,9 @@ import {
     LitElement,
     html,
     css,
+    styleMap,
+    ref,
+    createRef,
 } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/all/lit-all.min.js';
 
 /**
@@ -15,7 +18,7 @@ import {
  * @prop {boolean} wishlisted - Whether a user has added the movie to their wishlist
  * @attr wishlisted
  */
-class Component extends LitElement {
+class MoviePreview extends LitElement {
     static get properties() {
         return {
             label: { type: String },
@@ -24,64 +27,63 @@ class Component extends LitElement {
         }
     }
 
-    play() {
-        // this.querySelector('video').play()
-    }
+    static styles = css`
+        .resting {
+            border: 1px solid grey;
+            padding: 1rem;
+            background-color: grey;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            position: relative;
+            height: 200px;
+            width: 400px;
+        }
 
-    pause() {
-        // this.querySelector('video').pause()
-    }
+        .preview {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            color: white;
+            transform: scale(1);
+            transition: transform 0.3s;
+        }
+
+        .resting:hover {
+            z-index: 10;
+        }
+
+        .resting:hover > .preview {
+            opacity: 1;
+            transform: scale(1.3)
+        }
+
+        video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+    `
 
     render() {
+        const backgroundStyle = {
+            backgroundImage: `url('${this.image}')`,
+        }
+
         return html`
-            <div class="resting" @mouseover="${this.play}" @mouseover="${this.pause}">
+            <div class="resting" style="${styleMap(backgroundStyle)}">
                 <div class="preview">
                     <video src="/assets/placeholder.mp4" loop></video>
                     <span class="label">${this.label}</span>
-                    <button class="wishlist">${this.wishlisted ? 'Unlist' : 'Wishlist'}</button>
                 </div>
             </div>
         `
     }
 }
 
-customElements.define('movie-preview', Component)
+customElements.define('movie-preview', MoviePreview)
 
-
-    // static styles = css`
-    //     .resting {
-    //         border: 1px solid grey;
-    //         padding: 1rem;
-    //         background-color: grey;
-    //         background: url("${this.image}");
-    //         background-size: cover;
-    //         background-position: center;
-    //         cursor: pointer;
-    //         position: relative;
-    //         height: 200px;
-    //         width: 400px;
-    //     }
-
-    //     .preview {
-    //         display: none;
-    //         position: absolute;
-    //         top: -50%;
-    //         left: -20%;
-    //         width: 140%;
-    //         height: 200%;
-    //         background: black;
-    //         color: white;
-    //     }
-
-    //     .resting:hover {
-    //         z-index: 10;
-    //     }
-
-    //     .resting:hover > .preview {
-    //         display: block;
-    //     }
-
-    //     video {
-    //         width: 100%;
-    //     }
-    // `
