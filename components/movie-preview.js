@@ -24,6 +24,7 @@ class MoviePreview extends LitElement {
             label: { type: String },
             image: { type: String },
             wishlisted: { type: Boolean },
+            muted: { state: true, type: Boolean }
         }
     }
 
@@ -69,19 +70,49 @@ class MoviePreview extends LitElement {
         }
     `
 
+    play() {
+        this.videoRef.value.play()
+    }
+
+    pause() {
+        this.videoRef.value.pause()
+    }
+
+    toggleMute() {
+        this.muted = !this.muted
+    }
+
     render() {
         const backgroundStyle = {
             backgroundImage: `url('${this.image}')`,
         }
 
+        const inlineStyle = styleMap(backgroundStyle)
         return html`
-            <div class="resting" style="${styleMap(backgroundStyle)}">
+            <div class="resting"
+                style="${inlineStyle}"
+                @mouseover="${this.play}"
+                @mouseout="${this.pause}"
+            >
                 <div class="preview">
-                    <video src="/assets/placeholder.mp4" loop></video>
+                    <video 
+                        ${ref(this.videoRef)}
+                        .muted=${this.muted}
+                         src="/assets/placeholder.mp4"
+                         loop
+                    ></video>
+                    <button @click="${this.toggleMute}">${this.muted ? 'Unmute' : 'Mute'}</button>
                     <span class="label">${this.label}</span>
                 </div>
             </div>
         `
+    }
+
+    
+    constructor() {
+        super()
+        this.muted = true
+        this.videoRef = createRef()
     }
 }
 
