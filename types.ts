@@ -27,4 +27,22 @@ export type genre = {
     name: string
 }
 
+export type phase = 'loading' | 'resting'
 
+export type state = {
+    phase: phase,
+    movies: movie[],
+    genres: { 
+        drama: string[],
+        horror: string[],
+        action: string[],
+     },
+    wishlisted: string[],
+}
+
+export type subscription = {
+    id: string
+    callback: (prev: state, next: state) => void
+}
+
+export type changes = (state: state) => state

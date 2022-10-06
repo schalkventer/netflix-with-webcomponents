@@ -98,9 +98,9 @@ class MoviesList extends LitElement {
 
             <div>
                 <ul ${ref(this.listRef)}>
-                    ${this.movies.map(({ name, image }) => {
+                    ${this.movies.map(({ id, name, image }) => {
                         return html`
-                            <movie-preview image="${image}" label="${name}"></movie-preview>`
+                            <movie-preview key="${id}" image="${image}" label="${name}"></movie-preview>`
                     })}
                 </ul>
 

@@ -7,6 +7,8 @@ import {
     createRef,
 } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/all/lit-all.min.js';
 
+import { store } from '../store.js'
+
 /**
  * @element movie-preview - Show a single movie as a preview card
  * @prop {string | null} image - The preview image to show for the movie
@@ -21,10 +23,12 @@ import {
 class MoviePreview extends LitElement {
     static get properties() {
         return {
+            key: { type: String },
             label: { type: String },
             image: { type: String },
             wishlisted: { type: Boolean },
-            muted: { state: true, type: Boolean }
+            muted: { state: true, type: Boolean },
+            modal: { state: true, type: Boolean }
         }
     }
 
@@ -68,6 +72,10 @@ class MoviePreview extends LitElement {
             height: 200px;
             object-fit: cover;
         }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.75);
+        }
     `
 
     play() {
@@ -82,13 +90,44 @@ class MoviePreview extends LitElement {
         this.muted = !this.muted
     }
 
+    toggleWishlist() {
+        const newWishlist = !this.wishlisted
+        this.wishlisted = newWishlist
+
+        if (newWishlist) {
+            store.update(state => ({
+                ...state,
+                wishlisted: [...state.wishlisted, this.key]
+            }))
+        } else {
+            store.update(state => ({
+                ...state,
+                wishlisted: state.wishlisted.filter(item => item !== this.key)
+            })) 
+        }
+    }
+
+    toggleModal() {
+        const newModal = !this.modal
+        this.modal = newModal
+
+        if (newModal) return this.modalRef.value.showModal()
+        this.modalRef.value.close()
+    }
+
     render() {
         const backgroundStyle = {
             backgroundImage: `url('${this.image}')`,
         }
 
         const inlineStyle = styleMap(backgroundStyle)
+
         return html`
+            <dialog ${ref(this.modalRef)}>
+                <span class="label">${this.label}</span>
+                <button @click="${this.toggleModal}">Close</button>
+            </dialog>
+
             <div class="resting"
                 style="${inlineStyle}"
                 @mouseover="${this.play}"
@@ -98,10 +137,12 @@ class MoviePreview extends LitElement {
                     <video 
                         ${ref(this.videoRef)}
                         .muted=${this.muted}
+                        @click="${this.toggleModal}"
                          src="/assets/placeholder.mp4"
                          loop
                     ></video>
                     <button @click="${this.toggleMute}">${this.muted ? 'Unmute' : 'Mute'}</button>
+                    <button @click="${this.toggleWishlist}">${this.wishlisted ? 'Unwishlist' : 'Wishlist'}</button>
                     <span class="label">${this.label}</span>
                 </div>
             </div>
@@ -113,6 +154,7 @@ class MoviePreview extends LitElement {
         super()
         this.muted = true
         this.videoRef = createRef()
+        this.modalRef = createRef()
     }
 }
 
